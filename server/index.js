@@ -73,6 +73,16 @@ socketIO.on("connection", (socket) => {
             */
     });
 
+    socket.on("fetchComments", (data) => {
+        const { category, id } = data;
+        const taskItems = tasks[category].items;
+        for (let i = 0; i < taskItems.length; i++) {
+            if (taskItems[i].id === id) {
+                socket.emit("comments", taskItems[i].comments);
+            }
+        }
+    });
+
     socket.on("disconnect", () => {
         socket.disconnect();
         console.log("🔥: A user disconnected");
