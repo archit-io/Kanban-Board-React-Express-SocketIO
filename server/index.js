@@ -20,7 +20,27 @@ socketIO.on("connection", (socket) => {
     console.log(`⚡: ${socket.id} user just connected!`);
 
     socket.on("taskDragged", (data) => {
-        console.log(data);
+        const { source, destination } = data;
+    
+        // Gets the item that was dragged
+        const itemMoved = {
+            ...tasks[source.droppableId].items[source.index],
+        };
+        console.log("DraggedItem>>> ", itemMoved);
+    
+        // Removes the item from the its source
+        tasks[source.droppableId].items.splice(source.index, 1);
+    
+        // Add the item to its destination using its destination index
+        tasks[destination.droppableId].items.splice(destination.index, 0, itemMoved);
+    
+        // Sends the updated tasks object to the React app
+        socket.emit("tasks", tasks);
+    
+        /*  Print the items at the Source and Destination
+            console.log("Source >>>", tasks[source.droppableId].items);
+            console.log("Destination >>>", tasks[destination.droppableId].items);
+            */
     });
 
     socket.on("disconnect", () => {
@@ -29,10 +49,10 @@ socketIO.on("connection", (socket) => {
     });
 });
 
-//👇🏻 Generates a random string
+// Generates a random string
 const fetchID = () => Math.random().toString(36).substring(2, 10);
 
-//👇🏻 Nested object
+// Nested object
 let tasks = {
     pending: {
         title: "pending",
@@ -78,7 +98,7 @@ let tasks = {
     },
 };
 
-//👇🏻 host the tasks object via the /api route
+// host the tasks object via the /api route
 app.get("/api", (req, res) => {
     res.json(tasks);
 });
